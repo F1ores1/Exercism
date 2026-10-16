@@ -1,0 +1,38 @@
+
+using System.Threading.Tasks;
+public static class ParallelLetterFrequency
+{
+    private static Dictionary<char, int> LetterDictionary = new();
+    public static async Task<Dictionary<char, int>> Calculate(IEnumerable<string> texts)
+    {
+        LetterDictionary = new();
+        var letterTasks = new List<Task>();
+
+        var letters = texts.SelectMany(w => w)
+            .Distinct()
+            .Where(char.IsLetter)
+            .OrderBy(c => c);
+
+        foreach (var c in letters)
+        {
+            letterTasks.Add(LetterCount(c, texts));
+        }
+            
+        
+
+        await Task.WhenAll(letterTasks);
+        return LetterDictionary;
+    }
+
+    static async Task LetterCount(char letter, IEnumerable<string> texts)
+    {
+        var count = texts
+            .Sum(word => word
+            .Select(char.ToLower)
+            .Count(c => c == letter));
+        if (count > 0)
+            LetterDictionary.Add(letter, count);
+        
+        
+    }
+}
